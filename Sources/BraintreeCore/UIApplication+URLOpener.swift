@@ -8,6 +8,8 @@ public protocol URLOpener {
 
     func canOpenURL(_ url: URL) -> Bool
     func open(_ url: URL, completionHandler completion: ((Bool) -> Void)?)
+    // swiftlint:disable:next line_length
+    func open(_ url: URL, withOptions options: [UIApplication.OpenExternalURLOptionsKey: Any], completionHandler completion: ((Bool) -> Void)?)
     func isPayPalAppInstalled() -> Bool
     func isVenmoAppInstalled() -> Bool
 }
@@ -40,5 +42,12 @@ extension UIApplication: URLOpener {
     @_documentation(visibility: private)
     public func open(_ url: URL, completionHandler completion: ((Bool) -> Void)?) {
         UIApplication.shared.open(url, options: [:], completionHandler: completion)
+    }
+
+    /// Opens the specified URL using the PayPal app with the provided options and handles the completion.
+    @_documentation(visibility: private)
+    // swiftlint:disable:next line_length
+    public func open(_ url: URL, withOptions options: [UIApplication.OpenExternalURLOptionsKey: Any], completionHandler completion: ((Bool) -> Void)?) {
+        UIApplication.shared.open(url, options: options, completionHandler: completion)
     }
 }
