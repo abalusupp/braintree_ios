@@ -46,12 +46,11 @@ struct BTPayPalApprovalURLParser {
     }
 
     init?(body: BTJSON) {
+        let fallbackUrl = body["agreementSetup"]["approvalUrl"].asURL()
         if let payPalAppRedirectURL = body["agreementSetup"]["paypalAppApprovalUrl"].asURL() {
-            let fallbackUrl = body["agreementSetup"]["approvalUrl"].asURL()
             redirectType = .payPalApp(url: payPalAppRedirectURL, fallbackUrl: fallbackUrl)
             url = payPalAppRedirectURL
-        } else if let approvalURL = body["paymentResource"]["redirectUrl"].asURL() ??
-            body["agreementSetup"]["approvalUrl"].asURL() {
+        } else if let approvalURL = body["paymentResource"]["redirectUrl"].asURL() ?? fallbackUrl {
             redirectType = .webBrowser(url: approvalURL)
             url = approvalURL
         } else {
