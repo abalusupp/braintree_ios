@@ -41,7 +41,7 @@ extension UIApplication: URLOpener {
     /// Indicates whether the PayPal App is installed.
     @_documentation(visibility: private)
     public func open(_ url: URL, completionHandler completion: ((Bool) -> Void)?) {
-        UIApplication.shared.open(url, options: [:], completionHandler: completion)
+        open(url, withOptions: [:], completionHandler: completion)
     }
 
     /// Opens the specified URL using the PayPal app with the provided options and handles the completion.
