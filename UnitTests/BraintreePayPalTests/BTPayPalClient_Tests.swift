@@ -1019,15 +1019,11 @@ class BTPayPalClient_Tests: XCTestCase {
         XCTAssertEqual(mockAPIClient.postedAnalyticsEvents.removeLast(), appSwitchFailedEvent)
     }
 
-    func testIsiOSAppSwitchAvailableWithFallbackUrl_whenApplicationCantOpenPayPalInAppURL_opensInBrowser_returnsTrueAndSendsAnalytics() {
+    func testIsiOSAppSwitchAvailableWithFallbackUrl_whenApplicationCantOpenPayPalInAppURL_opensInExternalBrowser_returnsTrueAndSendsAnalytics() {
         let fakeApplication = FakeApplication()
         fakeApplication.cannedCanOpenURL = true
         fakeApplication.cannedOpenURLSuccess = false
         payPalClient.application = fakeApplication
-
-        let mockWebAuthenticationSession = MockWebAuthenticationSession()
-        mockWebAuthenticationSession.cannedResponseURL = URL(string: "sdk.ios.braintree://onetouch/v1/success")
-        payPalClient.webAuthenticationSession = mockWebAuthenticationSession
 
         let vaultRequest = BTPayPalVaultRequest(
             userAuthenticationEmail: "fake@gmail.com",
@@ -1046,11 +1042,7 @@ class BTPayPalClient_Tests: XCTestCase {
 
         XCTAssertEqual("v1/paypal_hermes/setup_billing_agreement", mockAPIClient.lastPOSTPath)
 
-        let browserPresentationSucceededEvent = BTPayPalAnalytics.browserPresentationSucceeded
-        XCTAssertNotNil(mockAPIClient.postedAnalyticsEvents.first(where: { $0 == browserPresentationSucceededEvent }))
-
-        let handleReturnStartedEvent = BTPayPalAnalytics.handleReturnStarted
-        XCTAssertNotNil(mockAPIClient.postedAnalyticsEvents.first(where: { $0 == handleReturnStartedEvent }))
+        XCTAssertEqual(fakeApplication.lastOpenURL?.absoluteString, "https://www.paypal.com/agreements/approve?ba_token=BA-23C14671VM609994M&platform=ios")
     }
 
     func testInvokedOpenURLSuccessfully_sendsAppSwitchSucceededWithAppSwitchURL() {
