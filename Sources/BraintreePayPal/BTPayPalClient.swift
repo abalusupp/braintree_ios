@@ -271,7 +271,7 @@ import BraintreeDataCollector
         webSessionReturned = true
     }
     
-    func handlePayPalRequest(
+    func handlePayPalInAppBrowserSwitch(
         with url: URL,
         completion: @escaping (BTPayPalAccountNonce?, Error?) -> Void
     ) {
@@ -280,7 +280,7 @@ import BraintreeDataCollector
             notifyFailure(with: BTPayPalError.asWebAuthenticationSessionURLInvalid(scheme), completion: completion)
             return
         }
-        performSwitchRequest(with: url, completion: completion)
+        performInAppBrowserSwitchRequest(with: url, completion: completion)
     }
 
     func invokedOpenURLSuccessfully(_ url: URL, completion: @escaping (BTPayPalAccountNonce?, Error?) -> Void) {
@@ -358,14 +358,14 @@ import BraintreeDataCollector
         completion: @escaping (BTPayPalAccountNonce?, Error?) -> Void
     ) {
         linkType = (request as? BTPayPalVaultRequest)?.enablePayPalAppSwitch == true ? .universal : .deeplink
-        
+
         apiClient.sendAnalyticsEvent(BTPayPalAnalytics.tokenizeStarted, isVaultRequest: isVaultRequest, linkType: linkType)
         apiClient.fetchOrReturnRemoteConfiguration { configuration, error in
             if let error {
                 self.notifyFailure(with: error, completion: completion)
                 return
             }
-            
+
             guard let configuration, let json = configuration.json else {
                 self.notifyFailure(with: BTPayPalError.fetchConfigurationFailed, completion: completion)
                 return
@@ -377,7 +377,7 @@ import BraintreeDataCollector
                 self.notifyFailure(with: BTPayPalError.disabled, completion: completion)
                 return
             }
-            
+
             self.payPalRequest = request
             self.apiClient.post(
                 request.hermesPath,
@@ -392,7 +392,7 @@ import BraintreeDataCollector
                         self.notifyFailure(with: error, completion: completion)
                         return
                     }
-                    
+
                     let errorDetailsIssue = jsonResponseBody["paymentResource"]["errorDetails"][0]["issue"]
                     var dictionary = error.userInfo
                     dictionary[NSLocalizedDescriptionKey] = errorDetailsIssue
@@ -406,7 +406,7 @@ import BraintreeDataCollector
                 }
                 
                 self.payPalContextID = approvalURL.baToken ?? approvalURL.ecToken
-                
+
                 let dataCollector = BTDataCollector(apiClient: self.apiClient)
                 self.clientMetadataID = self.payPalRequest?.riskCorrelationID ?? dataCollector.clientMetadataID(self.payPalContextID)
 
@@ -416,7 +416,7 @@ import BraintreeDataCollector
                         self.notifyFailure(with: BTPayPalError.missingBAToken, completion: completion)
                         return
                     }
-                    
+
                     let config = BTPayPalClientAppLaunchConfig(
                         appSwitchUrl: appSwitchUrl,
                         baToken: baToken,
@@ -424,7 +424,7 @@ import BraintreeDataCollector
                     )
                     self.launchPayPalApp(with: config, completion: completion)
                 case .webBrowser(let browserSwitchUrl):
-                    self.handlePayPalRequest(with: browserSwitchUrl, completion: completion)
+                    self.handlePayPalInAppBrowserSwitch(with: browserSwitchUrl, completion: completion)
                 }
             }
         }
@@ -479,7 +479,7 @@ import BraintreeDataCollector
         }
     }
 
-    private func performSwitchRequest(
+    private func performInAppBrowserSwitchRequest(
         with url: URL,
         completion: @escaping (BTPayPalAccountNonce?, Error?) -> Void
     ) {
