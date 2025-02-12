@@ -11,7 +11,7 @@ import Foundation
 struct BTPayPalClientAppLaunchConfig {
 
     // The universal link URL used to launch the PayPal client app.
-    let url: URL
+    let appSwitchUrl: URL
 
     // The BA (Billing Agreement) token
     let baToken: String
@@ -19,8 +19,8 @@ struct BTPayPalClientAppLaunchConfig {
     // An optional fallback URL to be used if the universal link fails.
     let fallbackUrl: URL?
 
-    init(url: URL, baToken: String, fallbackUrl: URL? = nil) {
-        self.url = url
+    init(appSwitchUrl: URL, baToken: String, fallbackUrl: URL? = nil) {
+        self.appSwitchUrl = appSwitchUrl
         self.baToken = baToken
         self.fallbackUrl = fallbackUrl
     }
