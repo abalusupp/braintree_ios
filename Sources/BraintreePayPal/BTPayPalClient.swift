@@ -429,10 +429,23 @@ import BraintreeDataCollector
                 self.invokedOpenURLSuccessfully(appSwitchURL, completion: completion)
             } else {
                 if let fallbackUrl = config.fallbackUrl {
-                    self.handlePayPalRequest(with: fallbackUrl, completion: completion)
+                    self.handleFallbackToExternalBrowser(forUrl: fallbackUrl, completion: completion)
                 } else {
                     self.failedToInvokeOpenURL(appSwitchURL, completion: completion)
                 }
+            }
+        }
+    }
+    
+    private func handleFallbackToExternalBrowser(
+        forUrl url: URL,
+        completion: @escaping (BTPayPalAccountNonce?, Error?) -> Void
+    ) {
+        application.open(url) { didOpened in
+            if didOpened {
+                self.invokedOpenURLSuccessfully(url, completion: completion)
+            } else {
+                self.failedToInvokeOpenURL(url, completion: completion)
             }
         }
     }
